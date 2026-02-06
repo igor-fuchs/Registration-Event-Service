@@ -53,4 +53,7 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
-PROJECT_IDEA.md
+# appsettings files
+appsettings.Development.json
+
+PROJECT_IDEA*.md
