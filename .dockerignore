@@ -1,0 +1,38 @@
+# Docker ignore file
+# Excludes files and directories from Docker build context
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE / Editor
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Build outputs
+**/bin/
+**/obj/
+artifacts/
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Tests (not needed in production image)
+tests/
+
+# GitHub
+.github/
+
+# Misc
+*.log
+*.tmp
