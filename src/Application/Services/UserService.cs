@@ -15,16 +15,17 @@ public sealed class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEventPublisher _eventPublisher;
+    //private readonly IEventPublisher _eventPublisher;
 
     public UserService(
         IUserRepository userRepository,
-        IUnitOfWork unitOfWork,
-        IEventPublisher eventPublisher)
+        IUnitOfWork unitOfWork
+        // IEventPublisher eventPublisher
+        )
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
-        _eventPublisher = eventPublisher;
+        //_eventPublisher = eventPublisher;
     }
 
     /// <inheritdoc />
@@ -44,7 +45,7 @@ public sealed class UserService : IUserService
 
         // Publish domain event (fire-and-forget to SNS)
         var @event = new UserCreatedEvent(user.Id, user.Email, user.CreatedAt);
-        await _eventPublisher.PublishAsync(@event, cancellationToken);
+        //await _eventPublisher.PublishAsync(@event, cancellationToken);
 
         return MapToResponse(user);
     }
