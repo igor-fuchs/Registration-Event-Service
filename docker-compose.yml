@@ -35,16 +35,19 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/api/Dockerfile.dev
     container_name: registration-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=RegistrationEventService;User Id=service_login;Password=SenhaForte@123;TrustServerCertificate=True
       - Aws__Sns__TopicArn=arn:aws:sns:us-east-1:123456789012:UserCreated
       - Aws__Sns__Region=us-east-1
     ports:
       - "5000:8080"
+    volumes:
+      - ./src:/src/src
     depends_on:
       sqlserver:
         condition: service_healthy
