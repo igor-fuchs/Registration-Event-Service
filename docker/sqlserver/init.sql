@@ -66,6 +66,22 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[auth] TO [service_login];
 PRINT '✔ Permissions on [auth] schema granted to [service_login].';
 GO
 
+-- 4.1 Create the [catalog] schema
+-- -----------------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = N'catalog')
+BEGIN
+    EXEC('CREATE SCHEMA [catalog] AUTHORIZATION [dbo]');
+    PRINT '✔ Schema [catalog] created.';
+END
+ELSE
+    PRINT '⏭ Schema [catalog] already exists.';
+GO
+
+-- Grant service_login permissions on the catalog schema
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[catalog] TO [service_login];
+PRINT '✔ Permissions on [catalog] schema granted to [service_login].';
+GO
+
 -- 5. Create table [auth].[Users]
 -- -----------------------------------------------------------------------------
 IF NOT EXISTS (SELECT 1 FROM sys.tables t
@@ -107,6 +123,56 @@ BEGIN
 END
 ELSE
     PRINT '⏭ User "Bob Smith" already exists.';
+GO
+
+-- 7. Create table [catalog].[Products]
+-- -----------------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.tables t
+               JOIN sys.schemas s ON t.schema_id = s.schema_id
+               WHERE s.name = N'catalog' AND t.name = N'Products')
+BEGIN
+    CREATE TABLE [catalog].[Products]
+    (
+        [Id]          INT            IDENTITY(1,1) NOT NULL,
+        [Name]        NVARCHAR(150)  NOT NULL,
+        [Sku]         NVARCHAR(64)   NOT NULL,
+        [Supplier]    NVARCHAR(150)  NOT NULL,
+        [Price]       DECIMAL(18,2)  NOT NULL,
+        [Description] NVARCHAR(1000) NULL,
+        [CreatedAt]   DATETIME2      NOT NULL,
+
+        CONSTRAINT [PK_Products]       PRIMARY KEY CLUSTERED ([Id]),
+        CONSTRAINT [UQ_Products_Sku]   UNIQUE ([Sku])
+    );
+    PRINT '✔ Table [catalog].[Products] created.';
+END
+ELSE
+    PRINT '⏭ Table [catalog].[Products] already exists.';
+GO
+
+-- 8. Seed two sample products
+-- -----------------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM [catalog].[Products] WHERE [Sku] = N'SKU-0001')
+BEGIN
+    INSERT INTO [catalog].[Products]
+        ([Name], [Sku], [Supplier], [Price], [Description], [CreatedAt])
+    VALUES
+        (N'Wireless Mouse', N'SKU-0001', N'Northwind Supplies', 49.90, N'Ergonomic wireless mouse', SYSUTCDATETIME());
+    PRINT '✔ Product "Wireless Mouse" seeded.';
+END
+ELSE
+    PRINT '⏭ Product "Wireless Mouse" already exists.';
+
+IF NOT EXISTS (SELECT 1 FROM [catalog].[Products] WHERE [Sku] = N'SKU-0002')
+BEGIN
+    INSERT INTO [catalog].[Products]
+        ([Name], [Sku], [Supplier], [Price], [Description], [CreatedAt])
+    VALUES
+        (N'USB-C Hub', N'SKU-0002', N'Contoso Hardware', 129.00, N'7-in-1 USB-C hub', SYSUTCDATETIME());
+    PRINT '✔ Product "USB-C Hub" seeded.';
+END
+ELSE
+    PRINT '⏭ Product "USB-C Hub" already exists.';
 GO
 
 PRINT '====================================================================';
