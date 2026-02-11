@@ -7,13 +7,14 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 USER root
 
 # Copy initialization assets
-COPY init.sql /docker-entrypoint-initdb.d/init.sql
-COPY entrypoint.sh /docker-entrypoint-initdb.d/entrypoint.sh
+COPY init.sql /docker/init.sql
+COPY entrypoint.sh /docker/entrypoint.sh
 
-# Make the entrypoint executable
-RUN chmod +x /docker-entrypoint-initdb.d/entrypoint.sh
+# Fix Windows CRLF line endings and execute permissions for the entrypoint script
+RUN sed -i 's/\r$//' /docker/entrypoint.sh
+RUN chmod +x /docker/entrypoint.sh
 
 USER mssql
 
 # Use custom entrypoint that runs SQL Server + init script
-ENTRYPOINT ["/docker-entrypoint-initdb.d/entrypoint.sh"]
+ENTRYPOINT ["/docker/entrypoint.sh"]
