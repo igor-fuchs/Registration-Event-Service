@@ -45,7 +45,15 @@ public sealed class ExceptionHandlingMiddleware
                 HttpStatusCode.Conflict,
                 CreateProblemDetails(context, HttpStatusCode.Conflict, "Conflict", e.Message)),
 
+            ProductAlreadyExistsException e => (
+                HttpStatusCode.Conflict,
+                CreateProblemDetails(context, HttpStatusCode.Conflict, "Conflict", e.Message)),
+
             UserNotFoundException e => (
+                HttpStatusCode.NotFound,
+                CreateProblemDetails(context, HttpStatusCode.NotFound, "Not Found", e.Message)),
+
+            ProductNotFoundException e => (
                 HttpStatusCode.NotFound,
                 CreateProblemDetails(context, HttpStatusCode.NotFound, "Not Found", e.Message)),
 
