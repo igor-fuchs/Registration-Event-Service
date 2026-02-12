@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/lambda/">
+    <Project Path="lambda/EventHandler.csproj" />
+  </Folder>
+</Solution>
