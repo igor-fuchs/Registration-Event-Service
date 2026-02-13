@@ -1,3 +1,5 @@
+using System.Text.Json;
+using EventHandler.Events;
 using Microsoft.Extensions.Logging;
 
 namespace EventHandler.Services;
@@ -5,12 +7,19 @@ namespace EventHandler.Services;
 /// <summary>
 /// Service for handling SNS event processing orchestration.
 /// Routes events to appropriate handlers based on event type.
+/// Deserializes events using strongly-typed contracts for type safety.
 /// </summary>
 public sealed class EventProcessingService
 {
     private readonly EmailService _emailService;
     private readonly AuditService _auditService;
     private readonly ILogger<EventProcessingService> _logger;
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
 
     public EventProcessingService(
         EmailService emailService,
@@ -23,7 +32,7 @@ public sealed class EventProcessingService
     }
 
     /// <summary>
-    /// Routes incoming SNS messages to the appropriate handler.
+    /// Routes incoming SNS messages to the appropriate handler using strongly-typed event contracts.
     /// </summary>
     public async Task ProcessEventAsync(string eventType, string eventPayload, CancellationToken cancellationToken = default)
     {
@@ -33,11 +42,11 @@ public sealed class EventProcessingService
 
             switch (eventType)
             {
-                case "UserCreatedEvent":
+                case nameof(UserCreatedEvent):
                     await ProcessUserCreatedEventAsync(eventPayload, cancellationToken);
                     break;
 
-                case "ProductCreatedEvent":
+                case nameof(ProductCreatedEvent):
                     await ProcessProductCreatedEventAsync(eventPayload, cancellationToken);
                     break;
 
@@ -55,29 +64,32 @@ public sealed class EventProcessingService
 
     /// <summary>
     /// Handles UserCreatedEvent by sending welcome email and logging audit trail.
+    /// Uses strongly-typed event contract for type safety.
     /// </summary>
     private async Task ProcessUserCreatedEventAsync(string eventPayload, CancellationToken cancellationToken)
     {
         try
         {
-            var userEvent = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(eventPayload);
+            var userEvent = JsonSerializer.Deserialize<UserCreatedEvent>(eventPayload, JsonOptions);
 
             if (userEvent == null)
             {
-                _logger.LogError("Failed to deserialize UserCreatedEvent from payload");
+                _logger.LogError("Failed to deserialize UserCreatedEvent from payload: {Payload}", eventPayload);
                 return;
             }
 
-            var userId = int.Parse(userEvent["userId"]?.ToString() ?? "0");
-            var email = userEvent["email"]?.ToString() ?? string.Empty;
-            var createdAt = DateTime.Parse(userEvent["createdAt"]?.ToString() ?? DateTime.UtcNow.ToString("O"));
-
-            // Execute downstream actions asynchronously
+            // Execute downstream actions asynchronously with strongly-typed event
             await Task.WhenAll(
-                _emailService.SendWelcomeEmailAsync(email, createdAt, cancellationToken),
-                _auditService.LogUserCreatedAsync(userId, email, createdAt, cancellationToken));
+                _emailService.SendWelcomeEmailAsync(userEvent.Email, userEvent.CreatedAt, cancellationToken),
+                _auditService.LogUserCreatedAsync(userEvent.UserId, userEvent.Email, userEvent.CreatedAt, cancellationToken));
 
-            _logger.LogInformation("UserCreatedEvent processed successfully for UserId: {UserId}", userId);
+            _logger.LogInformation("UserCreatedEvent processed successfully for UserId: {UserId}, Email: {Email}", 
+                userEvent.UserId, userEvent.Email);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON deserialization failed for UserCreatedEvent");
+            throw;
         }
         catch (Exception ex)
         {
@@ -88,31 +100,33 @@ public sealed class EventProcessingService
 
     /// <summary>
     /// Handles ProductCreatedEvent by sending product notification and logging audit trail.
+    /// Uses strongly-typed event contract for type safety.
     /// </summary>
     private async Task ProcessProductCreatedEventAsync(string eventPayload, CancellationToken cancellationToken)
     {
         try
         {
-            var productEvent = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(eventPayload);
+            var productEvent = JsonSerializer.Deserialize<ProductCreatedEvent>(eventPayload, JsonOptions);
 
             if (productEvent == null)
             {
-                _logger.LogError("Failed to deserialize ProductCreatedEvent from payload");
+                _logger.LogError("Failed to deserialize ProductCreatedEvent from payload: {Payload}", eventPayload);
                 return;
             }
 
-            var productId = int.Parse(productEvent["productId"]?.ToString() ?? "0");
-            var name = productEvent["name"]?.ToString() ?? string.Empty;
-            var sku = productEvent["sku"]?.ToString() ?? string.Empty;
-            var price = decimal.Parse(productEvent["price"]?.ToString() ?? "0");
-            var createdAt = DateTime.Parse(productEvent["createdAt"]?.ToString() ?? DateTime.UtcNow.ToString("O"));
-
-            // Execute downstream actions asynchronously
+            // Execute downstream actions asynchronously with strongly-typed event
             await Task.WhenAll(
-                _emailService.SendProductNotificationEmailAsync(name, sku, price, cancellationToken),
-                _auditService.LogProductCreatedAsync(productId, name, sku, price, createdAt, cancellationToken));
+                _emailService.SendProductNotificationEmailAsync(productEvent.Name, productEvent.Sku, productEvent.Price, cancellationToken),
+                _auditService.LogProductCreatedAsync(productEvent.ProductId, productEvent.Name, productEvent.Sku, 
+                    productEvent.Price, productEvent.CreatedAt, cancellationToken));
 
-            _logger.LogInformation("ProductCreatedEvent processed successfully for ProductId: {ProductId}", productId);
+            _logger.LogInformation("ProductCreatedEvent processed successfully for ProductId: {ProductId}, Name: {Name}", 
+                productEvent.ProductId, productEvent.Name);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "JSON deserialization failed for ProductCreatedEvent");
+            throw;
         }
         catch (Exception ex)
         {

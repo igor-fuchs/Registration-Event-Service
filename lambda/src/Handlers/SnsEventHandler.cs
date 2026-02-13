@@ -1,11 +1,12 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SNSEvents;
+using Amazon.Lambda.Serialization.SystemTextJson;
 using EventHandler.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+[assembly: LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
 
 namespace EventHandler.Handlers;
 
@@ -56,8 +57,10 @@ public sealed class SnsEventHandler
     /// <summary>
     /// Handles SNS events by processing each record's message.
     /// This method is invoked by the Lambda runtime when an SNS event is received.
+    /// Handler format: EventHandler::EventHandler.Handlers.SnsEventHandler::FunctionHandler
     /// </summary>
-    public async Task HandleAsync(SNSEvent snsEvent, ILambdaContext context)
+    [LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
+    public async Task<string> FunctionHandler(SNSEvent snsEvent, ILambdaContext context)
     {
         _logger.LogInformation("Received SNS event with {RecordCount} records", snsEvent.Records.Count);
 
@@ -68,6 +71,7 @@ public sealed class SnsEventHandler
         {
             await Task.WhenAll(tasks);
             _logger.LogInformation("Successfully processed all SNS records");
+            return $"Successfully processed {snsEvent.Records.Count} records";
         }
         catch (AggregateException ae)
         {
