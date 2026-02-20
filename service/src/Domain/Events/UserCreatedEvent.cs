@@ -8,4 +8,4 @@ namespace RegistrationEventService.Domain.Events;
 public sealed record UserCreatedEvent(
     int UserId,
     string Email,
-    DateTime CreatedAt);
+    DateTime CreatedAt) : IDomainEvent;

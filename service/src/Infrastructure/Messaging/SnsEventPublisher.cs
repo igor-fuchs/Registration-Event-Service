@@ -4,6 +4,7 @@ using Amazon.SimpleNotificationService.Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RegistrationEventService.Domain.Abstractions;
+using RegistrationEventService.Domain.Events;
 
 namespace RegistrationEventService.Infrastructure.Messaging;
 
@@ -35,7 +36,7 @@ public sealed class SnsEventPublisher : IEventPublisher
     }
 
     public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
-        where TEvent : class
+        where TEvent : IDomainEvent
     {
         var eventType = typeof(TEvent).Name;
         var message = JsonSerializer.Serialize(@event, JsonOptions);

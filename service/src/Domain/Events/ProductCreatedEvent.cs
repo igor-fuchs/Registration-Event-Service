@@ -11,4 +11,4 @@ public sealed record ProductCreatedEvent(
     string Sku,
     string Supplier,
     decimal Price,
-    DateTime CreatedAt);
+    DateTime CreatedAt) : IDomainEvent;
