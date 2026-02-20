@@ -41,15 +41,15 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         // AWS SNS
-        // services.Configure<SnsOptions>(configuration.GetSection(SnsOptions.SectionName));
+        services.Configure<SnsOptions>(configuration.GetSection(SnsOptions.SectionName));
 
-        // var snsOptions = configuration.GetSection(SnsOptions.SectionName).Get<SnsOptions>()
-        //     ?? new SnsOptions();
+        var snsOptions = configuration.GetSection(SnsOptions.SectionName).Get<SnsOptions>()
+            ?? new SnsOptions();
 
-        // services.AddSingleton<IAmazonSimpleNotificationService>(_ =>
-        //     new AmazonSimpleNotificationServiceClient(RegionEndpoint.GetBySystemName(snsOptions.Region)));
+        services.AddSingleton<IAmazonSimpleNotificationService>(_ =>
+            new AmazonSimpleNotificationServiceClient(RegionEndpoint.GetBySystemName(snsOptions.Region)));
 
-        // services.AddScoped<IEventPublisher, SnsEventPublisher>();
+        services.AddScoped<IEventPublisher, SnsEventPublisher>();
 
         return services;
     }
