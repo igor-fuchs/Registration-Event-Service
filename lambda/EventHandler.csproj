@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
@@ -10,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.Core" Version="2.1.0" />
+    <PackageReference Include="Amazon.Lambda.Core" Version="2.2.0" />
     <PackageReference Include="Amazon.Lambda.SNSEvents" Version="2.1.1" />
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.0" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.300.0" />
