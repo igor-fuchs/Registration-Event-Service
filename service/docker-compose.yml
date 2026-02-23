@@ -45,7 +45,7 @@ services:
     ports:
       - "5000:8080"
     volumes:
-      - ./src:/src/src
+      - .:/src
       - ${USERPROFILE:-.}/.aws:/root/.aws:ro # host AWS credentials (read-only)
     depends_on:
       sqlserver:

@@ -1,0 +1,62 @@
+// For format details, see https://aka.ms/devcontainer.json
+// Uses docker-compose to spin up SQL Server alongside the dev container.
+{
+	"name": "Registration Event Service",
+
+	// ---------------------------------------------------------------------------
+	// Docker Compose integration
+	// ---------------------------------------------------------------------------
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "api",
+	"workspaceFolder": "/src",
+	"overrideCommand": true,
+	"shutdownAction": "stopCompose",
+
+	// ---------------------------------------------------------------------------
+	// Dev-container features (tools installed inside the API container)
+	// ---------------------------------------------------------------------------
+	"features": {
+		"ghcr.io/devcontainers/features/aws-cli:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/powershell:2": {}
+	},
+
+	// ---------------------------------------------------------------------------
+	// Ports forwarded to the host
+	// ---------------------------------------------------------------------------
+	"forwardPorts": [5000, 1433],
+	"portsAttributes": {
+		"5000": { "label": "API", "onAutoForward": "notify" },
+		"1433": { "label": "SQL Server", "onAutoForward": "notify" }
+	},
+
+	// ---------------------------------------------------------------------------
+	// Lifecycle commands
+	// ---------------------------------------------------------------------------
+	"postCreateCommand": "dotnet restore RegistrationEventService.slnx",
+
+	// ---------------------------------------------------------------------------
+	// VS Code customizations
+	// ---------------------------------------------------------------------------
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"dotnet.defaultSolution": "RegistrationEventService.slnx",
+				"editor.formatOnSave": true,
+				"omnisharp.enableEditorConfigSupport": true
+			},
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.csharp",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-mssql.mssql",
+				"humao.rest-client",
+				"eamodio.gitlens",
+				"formulahendry.dotnet-test-explorer"
+			]
+		}
+	},
+
+	// Run as root so dotnet watch / EF tools work without permission issues
+	"remoteUser": "root"
+}
