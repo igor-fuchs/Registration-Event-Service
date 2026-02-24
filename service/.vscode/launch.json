@@ -1,0 +1,53 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Inside the dev container (SQL Server reachable at "sqlserver")
+            "name": "Launch API (Container)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/artifacts/bin/Presentation/debug/Presentation.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Presentation",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://+:8080"
+            },
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s"
+            }
+        },
+        {
+            // Outside the dev container (SQL Server at localhost via docker-compose port mapping)
+            "name": "Launch API (Local)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/artifacts/bin/Presentation/debug/Presentation.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Presentation",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5000",
+                "ConnectionStrings__DefaultConnection": "Server=localhost,1433;Database=RegistrationEventService;User Id=service_login;Password=SenhaForte@123;TrustServerCertificate=True"
+            },
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s"
+            }
+        },
+        {
+            "name": "Attach to Process",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}
