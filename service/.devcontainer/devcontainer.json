@@ -8,7 +8,7 @@
 	// ---------------------------------------------------------------------------
 	"dockerComposeFile": "../docker-compose.yml",
 	"service": "api",
-	"workspaceFolder": "/src",
+	"workspaceFolder": "/workspace-dev",
 	"overrideCommand": true,
 	"shutdownAction": "stopCompose",
 
