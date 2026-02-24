@@ -14,6 +14,7 @@ COPY src/Domain/Domain.csproj src/Domain/
 COPY src/Application/Application.csproj src/Application/
 COPY src/Infrastructure/Infrastructure.csproj src/Infrastructure/
 COPY src/Presentation/Presentation.csproj src/Presentation/
+COPY tests/UnitTests.csproj tests/
 
 # Restore dependencies
 RUN dotnet restore RegistrationEventService.slnx
